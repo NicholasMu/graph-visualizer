@@ -431,6 +431,8 @@ public class DefaultGraphRenderer : IGraphRenderer
         return new Vector2((v.x + offset.x) * scaleFactor.x, (v.y + offset.y) * scaleFactor.y);
     }
 
+    private GUIStyle weightStyle;
+
     // Draw a node an return true if it has been clicked
     private void DrawNode(Rect nodeRect, Node node, bool selected)
     {
@@ -439,6 +441,19 @@ public class DefaultGraphRenderer : IGraphRenderer
         string formatedLabel = Regex.Replace(nodeTypeLegend.label, "(\\B[A-Z])", "\n$1"); // Split into multi-lines
 
         DrawRect(nodeRect, nodeTypeLegend.color, formatedLabel, node.active, selected);
+
+        var originalColor = GUI.color;
+
+        GUI.color = Color.white;
+        if(weightStyle == null)
+        {
+            weightStyle = new GUIStyle();
+            weightStyle.alignment = TextAnchor.LowerLeft;
+            weightStyle.fontStyle = FontStyle.Italic;
+        }
+        GUI.Box(nodeRect, string.Format(" weight : {0:F2}", node.weight), weightStyle);
+
+        GUI.color = originalColor;
     }
 
     // Compute the tangents for the graphLayout edges. Assumes that graphLayout is drawn from left to right
