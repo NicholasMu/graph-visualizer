@@ -211,6 +211,22 @@ public class DefaultGraphRenderer : IGraphRenderer
         if (m_SelectedNode != null)
         {
             GUILayout.Label(m_SelectedNode.ToString(), m_InspectorStyle);
+
+            if (((Playable)m_SelectedNode.content).IsValid())
+            {
+                int inputCount = ((Playable)m_SelectedNode.content).GetInputCount();
+
+                for (int i = 0; i < inputCount; i++)
+                {
+                    string lable = string.Format("Input {0} : ", i);
+                    EditorGUIUtility.labelWidth = GUI.skin.label.CalcSize(new GUIContent(lable)).x;
+                    float weightValue = ((Playable)m_SelectedNode.content).GetInputWeight(i);
+                    float weightValueAfter = EditorGUILayout.FloatField(lable, weightValue);
+                    if (Math.Abs(weightValueAfter - weightValue) > float.Epsilon)
+                        ((Playable)m_SelectedNode.content).SetInputWeight(i, weightValueAfter);
+                }
+            }
+
         }
         else
         {
@@ -431,8 +447,6 @@ public class DefaultGraphRenderer : IGraphRenderer
         return new Vector2((v.x + offset.x) * scaleFactor.x, (v.y + offset.y) * scaleFactor.y);
     }
 
-    private GUIStyle weightStyle;
-
     // Draw a node an return true if it has been clicked
     private void DrawNode(Rect nodeRect, Node node, bool selected)
     {
@@ -441,19 +455,6 @@ public class DefaultGraphRenderer : IGraphRenderer
         string formatedLabel = Regex.Replace(nodeTypeLegend.label, "(\\B[A-Z])", "\n$1"); // Split into multi-lines
 
         DrawRect(nodeRect, nodeTypeLegend.color, formatedLabel, node.active, selected);
-
-        var originalColor = GUI.color;
-
-        GUI.color = Color.white;
-        if(weightStyle == null)
-        {
-            weightStyle = new GUIStyle();
-            weightStyle.alignment = TextAnchor.LowerLeft;
-            weightStyle.fontStyle = FontStyle.Italic;
-        }
-        GUI.Box(nodeRect, string.Format(" weight : {0:F2}", node.weight), weightStyle);
-
-        GUI.color = originalColor;
     }
 
     // Compute the tangents for the graphLayout edges. Assumes that graphLayout is drawn from left to right
